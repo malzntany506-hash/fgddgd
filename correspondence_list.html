@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}المراسلات{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-envelope me-2"></i>إدارة المراسلات</h2>
+            <p class="mb-0 opacity-75">سجل جميع المراسلات الصادرة والواردة</p>
+        </div>
+        <a href="{{ url_for('correspondence_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>مراسلة جديدة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">نوع المراسلة</label>
+                <select name="doc_type" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="incoming" {% if request.args.get('doc_type') == 'incoming' %}selected{% endif %}>وارد</option>
+                    <option value="outgoing" {% if request.args.get('doc_type') == 'outgoing' %}selected{% endif %}>صادر</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">الحالة</label>
+                <select name="status" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>معلق</option>
+                    <option value="in_progress" {% if request.args.get('status') == 'in_progress' %}selected{% endif %}>قيد التنفيذ</option>
+                    <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>مكتمل</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">بحث</label>
+                <input type="text" name="search" class="form-control" placeholder="البحث بالرقم أو الموضوع..." value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>الرقم التسلسلي</th>
+                        <th>النوع</th>
+                        <th>الموضوع</th>
+                        <th>المرسل</th>
+                        <th>المستلم</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for corr in correspondences.items %}
+                    <tr>
+                        <td><strong>{{ corr.doc_number }}</strong></td>
+                        <td>
+                            {% if corr.doc_type == 'incoming' %}
+                                <span class="badge bg-primary">وارد</span>
+                            {% else %}
+                                <span class="badge bg-success">صادر</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ corr.subject[:50] }}...</td>
+                        <td>{{ corr.sender }}</td>
+                        <td>{{ corr.recipient or '-' }}</td>
+                        <td>
+                            {% if corr.priority == 'urgent' %}
+                                <span class="badge bg-danger">عاجل</span>
+                            {% elif corr.priority == 'high' %}
+                                <span class="badge bg-warning">مرتفع</span>
+                            {% else %}
+                                <span class="badge bg-secondary">عادي</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if corr.status == 'pending' %}
+                                <span class="badge badge-status badge-pending">معلق</span>
+                            {% elif corr.status == 'in_progress' %}
+                                <span class="badge badge-status badge-in-progress">قيد التنفيذ</span>
+                            {% elif corr.status == 'completed' %}
+                                <span class="badge badge-status badge-completed">مكتمل</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ corr.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('correspondence_view', id=corr.id) }}" class="btn btn-sm btn-outline-government" title="عرض">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if current_user.role == 'admin' %}
+                                <a href="{{ url_for('correspondence_delete', id=corr.id) }}" class="btn btn-sm btn-outline-danger" title="حذف" onclick="return confirm('هل أنت متأكد من حذف هذه المعاملة؟')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">لا توجد مراسلات</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if correspondences.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if correspondences.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('correspondence_list', page=correspondences.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in correspondences.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == correspondences.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('correspondence_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if correspondences.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('correspondence_list', page=correspondences.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

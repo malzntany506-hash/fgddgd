@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}طلب إجازة{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-calendar-plus me-2"></i>طلب إجازة جديد</h2>
+            <p class="mb-0 opacity-75">تقديم طلب إجازة جديد</p>
+        </div>
+        <a href="{{ url_for('leaves_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">الموظف <span class="text-danger">*</span></label>
+                    <select name="employee_id" class="form-select" required>
+                        <option value="">اختر الموظف</option>
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.full_name }} - {{ emp.department }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">نوع الإجازة <span class="text-danger">*</span></label>
+                    <select name="leave_type" class="form-select" required>
+                        <option value="">اختر نوع الإجازة</option>
+                        <option value="annual">سنوية</option>
+                        <option value="sick">مرضية</option>
+                        <option value="emergency">طارئة</option>
+                        <option value="unpaid">بدون راتب</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">من تاريخ <span class="text-danger">*</span></label>
+                    <input type="date" name="start_date" class="form-control" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">إلى تاريخ <span class="text-danger">*</span></label>
+                    <input type="date" name="end_date" class="form-control" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">السبب</label>
+                    <textarea name="reason" class="form-control" rows="4" placeholder="أدخل سبب الإجازة..."></textarea>
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('leaves_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-paper-plane me-2"></i>إرسال الطلب
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

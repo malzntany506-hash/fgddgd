@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة المستخدمين{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-users-cog me-2"></i>إدارة المستخدمين</h2>
+            <p class="mb-0 opacity-75">إضافة وتعديل حسابات المستخدمين</p>
+        </div>
+        <a href="{{ url_for('users_add') }}" class="btn btn-government">
+            <i class="fas fa-user-plus me-2"></i>إضافة مستخدم
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>اسم المستخدم</th>
+                    <th>الاسم الكامل</th>
+                    <th>الدور</th>
+                    <th>القسم</th>
+                    <th>الحالة</th>
+                    <th>تاريخ الإنشاء</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><strong>{{ user.username }}</strong></td>
+                    <td>{{ user.full_name }}</td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                            <span class="badge bg-danger">مدير</span>
+                        {% else %}
+                            <span class="badge bg-primary">موظف</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.department or '-' }}</td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="badge bg-success">نشط</span>
+                        {% else %}
+                            <span class="badge bg-secondary">غير نشط</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}الإجازات{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-calendar-alt me-2"></i>إدارة الإجازات</h2>
+            <p class="mb-0 opacity-75">طلبات الإجازات والموافقات</p>
+        </div>
+        <a href="{{ url_for('leaves_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>طلب إجازة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">الحالة</label>
+                <select name="status" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>قيد المراجعة</option>
+                    <option value="approved" {% if request.args.get('status') == 'approved' %}selected{% endif %}>موافق</option>
+                    <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>مرفوض</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">نوع الإجازة</label>
+                <select name="leave_type" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="annual" {% if request.args.get('leave_type') == 'annual' %}selected{% endif %}>سنوية</option>
+                    <option value="sick" {% if request.args.get('leave_type') == 'sick' %}selected{% endif %}>مرضية</option>
+                    <option value="emergency" {% if request.args.get('leave_type') == 'emergency' %}selected{% endif %}>طارئة</option>
+                    <option value="unpaid" {% if request.args.get('leave_type') == 'unpaid' %}selected{% endif %}>بدون راتب</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الموظف</th>
+                    <th>نوع الإجازة</th>
+                    <th>من تاريخ</th>
+                    <th>إلى تاريخ</th>
+                    <th>الحالة</th>
+                    <th>تاريخ الطلب</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves.items %}
+                <tr>
+                    <td>{{ leave.id }}</td>
+                    <td>{{ leave.employee.full_name if leave.employee else '-' }}</td>
+                    <td>
+                        {% if leave.leave_type == 'annual' %}
+                            <span class="badge bg-primary">سنوية</span>
+                        {% elif leave.leave_type == 'sick' %}
+                            <span class="badge bg-danger">مرضية</span>
+                        {% elif leave.leave_type == 'emergency' %}
+                            <span class="badge bg-warning">طارئة</span>
+                        {% elif leave.leave_type == 'unpaid' %}
+                            <span class="badge bg-secondary">بدون راتب</span>
+                        {% else %}
+                            <span class="badge bg-info">{{ leave.leave_type }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        {% if leave.status == 'approved' %}
+                            <span class="badge badge-status badge-approved">موافق</span>
+                        {% elif leave.status == 'rejected' %}
+                            <span class="badge badge-status badge-rejected">مرفوض</span>
+                        {% else %}
+                            <span class="badge badge-status badge-pending">قيد المراجعة</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ leave.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        {% if leave.status == 'pending' %}
+                            <a href="{{ url_for('leaves_approve', id=leave.id) }}" class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            <a href="{{ url_for('leaves_reject', id=leave.id) }}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد طلبات إجازات</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if leaves.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if leaves.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('leaves_list', page=leaves.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in leaves.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == leaves.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('leaves_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if leaves.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('leaves_list', page=leaves.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

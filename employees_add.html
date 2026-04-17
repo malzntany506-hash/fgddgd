@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة موظف{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-user-plus me-2"></i>إضافة موظف جديد</h2>
+            <p class="mb-0 opacity-75">تسجيل بيانات موظف جديد</p>
+        </div>
+        <a href="{{ url_for('employees_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة للقائمة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">الرقم الوظيفي <span class="text-danger">*</span></label>
+                    <input type="text" name="employee_number" class="form-control" required placeholder="مثال: EMP-001">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                    <input type="text" name="full_name" class="form-control" required placeholder="أدخل اسم الموظف">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">رقم الهوية</label>
+                    <input type="text" name="national_id" class="form-control" placeholder="رقم الهوية الوطنية">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">تاريخ الميلاد</label>
+                    <input type="date" name="birth_date" class="form-control">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">الجنس</label>
+                    <select name="gender" class="form-select">
+                        <option value="">اختر</option>
+                        <option value="male">ذكر</option>
+                        <option value="female">أنثى</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">الحالة الاجتماعية</label>
+                    <select name="marital_status" class="form-select">
+                        <option value="">اختر</option>
+                        <option value="single">أعزب</option>
+                        <option value="married">متزوج</option>
+                        <option value="divorced">مطلق</option>
+                        <option value="widowed">أرمل</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">رقم الهاتف</label>
+                    <input type="text" name="phone" class="form-control" placeholder="رقم الهاتف">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="email" class="form-control" placeholder="email@example.com">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">العنوان</label>
+                    <input type="text" name="address" class="form-control" placeholder="العنوان الكامل">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">القسم <span class="text-danger">*</span></label>
+                    <select name="department" class="form-select" required>
+                        <option value="">اختر القسم</option>
+                        <option value="الإدارة العامة">الإدارة العامة</option>
+                        <option value="الشؤون المالية">الشؤون المالية</option>
+                        <option value="شؤون الموظفين">شؤون الموظفين</option>
+                        <option value="التقنية المعلومات">التقنية المعلومات</option>
+                        <option value="الشؤون القانونية">الشؤون القانونية</option>
+                        <option value="الخدمات العامة">الخدمات العامة</option>
+                        <option value="المشاريع والإنشاءات">المشاريع والإنشاءات</option>
+                        <option value="الشؤون الإدارية">الشؤون الإدارية</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">المنصب <span class="text-danger">*</span></label>
+                    <input type="text" name="position" class="form-control" required placeholder="المسمى الوظيفي">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">تاريخ التعيين</label>
+                    <input type="date" name="hire_date" class="form-control">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">نوع العقد</label>
+                    <select name="contract_type" class="form-select">
+                        <option value="">اختر</option>
+                        <option value="دائم">دائم</option>
+                        <option value="مؤقت">مؤقت</option>
+                        <option value="عرضي">عرضي</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الراتب الأساسي</label>
+                    <input type="number" name="salary" class="form-control" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('employees_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-save me-2"></i>حفظ الموظف
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}تفاصيل المشروع{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-project-diagram me-2"></i>{{ project.project_name }}</h2>
+            <p class="mb-0 opacity-75">رقم المشروع: {{ project.project_number }}</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-outline-light">
+                <i class="fas fa-print me-2"></i>طباعة
+            </button>
+            <a href="{{ url_for('projects_list') }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-right me-2"></i>العودة
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card card-custom mb-4">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-info-circle me-2"></i>معلومات المشروع
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">رقم المشروع</label>
+                        <p class="mb-0 fw-bold">{{ project.project_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">الحالة</label>
+                        <p class="mb-0">
+                            {% if project.status == 'planning' %}
+                                <span class="badge badge-status badge-pending">تخطيط</span>
+                            {% elif project.status == 'in_progress' %}
+                                <span class="badge badge-status badge-in-progress">قيد التنفيذ</span>
+                            {% elif project.status == 'completed' %}
+                                <span class="badge badge-status badge-completed">مكتمل</span>
+                            {% elif project.status == 'suspended' %}
+                                <span class="badge badge-status badge-rejected">معلق</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted">الوصف</label>
+                        <p class="mb-0">{{ project.description or 'لا يوجد وصف' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">القسم</label>
+                        <p class="mb-0">{{ project.department or '-' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">المقاول</label>
+                        <p class="mb-0">{{ project.contractor or '-' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">تاريخ البدء</label>
+                        <p class="mb-0">{{ project.start_date.strftime('%Y-%m-%d') if project.start_date else '-' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">تاريخ الانتهاء</label>
+                        <p class="mb-0">{{ project.end_date.strftime('%Y-%m-%d') if project.end_date else '-' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">الميزانية</label>
+                        <p class="mb-0 text-primary fw-bold">{{ project.budget | round(2) if project.budget else 0 }} ر.س</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h5 class="mb-3">نسبة الإنجاز</h5>
+                <div class="progress" style="height: 30px;">
+                    <div class="progress-bar {% if project.completion_percentage == 100 %}bg-success{% elif project.completion_percentage >= 75 %}bg-info{% elif project.completion_percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %} fs-6" role="progressbar" style="width: {{ project.completion_percentage }}%">
+                        {{ project.completion_percentage }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-custom mb-4">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-tasks me-2"></i>المعالم (Milestones)
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>العنوان</th>
+                            <th>تاريخ الاستحقاق</th>
+                            <th>نسبة الإنجاز</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for milestone in milestones %}
+                        <tr>
+                            <td>{{ milestone.title }}</td>
+                            <td>{{ milestone.due_date.strftime('%Y-%m-%d') if milestone.due_date else '-' }}</td>
+                            <td>{{ milestone.completion_percentage }}%</td>
+                            <td>
+                                {% if milestone.status == 'completed' %}
+                                    <span class="badge bg-success">مكتمل</span>
+                                {% elif milestone.status == 'in_progress' %}
+                                    <span class="badge bg-info">قيد التنفيذ</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">معلق</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">لا يوجد معالم</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-custom mb-4">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-edit me-2"></i>تحديث حالة المشروع
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('projects_update', id=project.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label">نسبة الإنجاز</label>
+                        <input type="number" name="completion_percentage" class="form-control" min="0" max="100" value="{{ project.completion_percentage }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الحالة</label>
+                        <select name="status" class="form-select">
+                            <option value="planning" {% if project.status == 'planning' %}selected{% endif %}>تخطيط</option>
+                            <option value="in_progress" {% if project.status == 'in_progress' %}selected{% endif %}>قيد التنفيذ</option>
+                            <option value="completed" {% if project.status == 'completed' %}selected{% endif %}>مكتمل</option>
+                            <option value="suspended" {% if project.status == 'suspended' %}selected{% endif %}>معلق</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-government w-100">
+                        <i class="fas fa-save me-2"></i>تحديث
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card card-custom">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-flag me-2"></i>إضافة معلم جديد
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('milestones_add', id=project.id) }}">
+                    <div class="mb-2">
+                        <input type="text" name="title" class="form-control" placeholder="عنوان المعلم" required>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="description" class="form-control" rows="2" placeholder="وصف"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <input type="date" name="due_date" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-outline-government w-100">
+                        <i class="fas fa-plus me-2"></i>إضافة
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

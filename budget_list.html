@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}الميزانية{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-calculator me-2"></i>إدارة الميزانية</h2>
+            <p class="mb-0 opacity-75">سجل الميزانيات السنوية</p>
+        </div>
+        <a href="{{ url_for('budget_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>إضافة ميزانية
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>رقم الميزانية</th>
+                    <th>السنة المالية</th>
+                    <th>القسم</th>
+                    <th>المبلغ المرصود</th>
+                    <th>المصروف</th>
+                    <th>المتبقي</th>
+                    <th>النسبة المصروفة</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for budget in budgets.items %}
+                <tr>
+                    <td><strong>{{ budget.budget_number }}</strong></td>
+                    <td>{{ budget.fiscal_year }}</td>
+                    <td>{{ budget.department or '-' }}</td>
+                    <td class="text-primary fw-bold">{{ budget.allocated_amount | round(2) }} ر.س</td>
+                    <td class="text-danger">{{ budget.spent_amount | round(2) }} ر.س</td>
+                    <td class="text-success">{{ budget.remaining_amount | round(2) if budget.remaining_amount else (budget.allocated_amount - budget.spent_amount) | round(2) }} ر.س</td>
+                    <td>
+                        {% set percentage = (budget.spent_amount / budget.allocated_amount * 100) if budget.allocated_amount > 0 else 0 %}
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar {% if percentage > 90 %}bg-danger{% elif percentage > 70 %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ percentage }}%">
+                                {{ "%.1f"|format(percentage) }}%
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if budget.status == 'active' %}
+                            <span class="badge bg-success">نشط</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ budget.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد ميزانيات</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if budgets.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if budgets.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('budget_list', page=budgets.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in budgets.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == budgets.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('budget_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if budgets.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('budget_list', page=budgets.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

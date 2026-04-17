@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}أرشفة وثيقة{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-file-archive me-2"></i>أرشفة وثيقة جديدة</h2>
+            <p class="mb-0 opacity-75">حفظ وثيقة في الأرشيف الإلكتروني</p>
+        </div>
+        <a href="{{ url_for('archive_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row g-4">
+                <div class="col-12">
+                    <label class="form-label">عنوان الوثيقة <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control" required placeholder="أدخل عنوان الوثيقة">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">نوع المستند</label>
+                    <select name="doc_type" class="form-select">
+                        <option value="other">أخرى</option>
+                        <option value="correspondence">مراسلات</option>
+                        <option value="contract">عقود</option>
+                        <option value="financial">مالية</option>
+                        <option value="hr">موارد بشرية</option>
+                        <option value="project">مشاريع</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">القسم</label>
+                    <select name="department" class="form-select">
+                        <option value="">اختر القسم</option>
+                        <option value="الإدارة العامة">الإدارة العامة</option>
+                        <option value="الشؤون المالية">الشؤون المالية</option>
+                        <option value="شؤون الموظفين">شؤون الموظفين</option>
+                        <option value="التقنية المعلومات">التقنية المعلومات</option>
+                        <option value="الخدمات العامة">الخدمات العامة</option>
+                        <option value="المشاريع والإنشاءات">المشاريع والإنشاءات</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الوحدة المرتبطة</label>
+                    <select name="related_module" class="form-select">
+                        <option value="">لا يوجد</option>
+                        <option value="correspondence">مراسلات</option>
+                        <option value="employee">موظفين</option>
+                        <option value="budget">ميزانية</option>
+                        <option value="project">مشاريع</option>
+                        <option value="contract">عقود</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">رقم المعاملة المرتبطة</label>
+                    <input type="number" name="related_id" class="form-control" placeholder="رقم المعاملة">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">وصف الوثيقة</label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="وصف موجز للوثيقة..."></textarea>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">الملف</label>
+                    <input type="file" name="file_path" class="form-control">
+                    <small class="text-muted">PDF, DOC, DOCX, JPG, PNG, XLS, XLSX (حد أقصى 16 MB)</small>
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('archive_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-save me-2"></i>أرشفة الوثيقة
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

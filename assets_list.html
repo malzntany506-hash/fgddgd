@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}الأصول{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-building me-2"></i>إدارة الأصول</h2>
+            <p class="mb-0 opacity-75">سجل الأصول والممتلكات</p>
+        </div>
+        <a href="{{ url_for('assets_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>إضافة أصل
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">نوع الأصل</label>
+                <select name="asset_type" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="equipment" {% if request.args.get('asset_type') == 'equipment' %}selected{% endif %}>معدات</option>
+                    <option value="furniture" {% if request.args.get('asset_type') == 'furniture' %}selected{% endif %}>أثاث</option>
+                    <option value="vehicle" {% if request.args.get('asset_type') == 'vehicle' %}selected{% endif %}>مركبات</option>
+                    <option value="electronics" {% if request.args.get('asset_type') == 'electronics' %}selected{% endif %}>إلكترونيات</option>
+                    <option value="building" {% if request.args.get('asset_type') == 'building' %}selected{% endif %}>مباني</option>
+                    <option value="other" {% if request.args.get('asset_type') == 'other' %}selected{% endif %}>أخرى</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">الحالة</label>
+                <select name="status" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>نشط</option>
+                    <option value="maintenance" {% if request.args.get('status') == 'maintenance' %}selected{% endif %}>صيانة</option>
+                    <option value="retired" {% if request.args.get('status') == 'retired' %}selected{% endif %}>متقاعد</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>رقم الأصل</th>
+                    <th>اسم الأصل</th>
+                    <th>النوع</th>
+                    <th>الموقع</th>
+                    <th>الحالة</th>
+                    <th>القيمة الحالية</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in assets.items %}
+                <tr>
+                    <td><strong>{{ asset.asset_number }}</strong></td>
+                    <td>{{ asset.asset_name }}</td>
+                    <td>
+                        {% if asset.asset_type == 'equipment' %}
+                            <span class="badge bg-primary">معدات</span>
+                        {% elif asset.asset_type == 'furniture' %}
+                            <span class="badge bg-secondary">أثاث</span>
+                        {% elif asset.asset_type == 'vehicle' %}
+                            <span class="badge bg-info">مركبات</span>
+                        {% elif asset.asset_type == 'electronics' %}
+                            <span class="badge bg-warning">إلكترونيات</span>
+                        {% elif asset.asset_type == 'building' %}
+                            <span class="badge bg-success">مباني</span>
+                        {% else %}
+                            <span class="badge bg-secondary">أخرى</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ asset.location or '-' }}</td>
+                    <td>
+                        {% if asset.status == 'active' %}
+                            <span class="badge bg-success">نشط</span>
+                        {% elif asset.status == 'maintenance' %}
+                            <span class="badge bg-warning">صيانة</span>
+                        {% elif asset.status == 'retired' %}
+                            <span class="badge bg-secondary">متقاعد</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ asset.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-primary fw-bold">{{ asset.current_value | round(2) if asset.current_value else 0 }} ر.س</td>
+                    <td>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#maintenanceModal{{ asset.id }}" title="صيانة">
+                                <i class="fas fa-wrench"></i>
+                            </button>
+                            {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('assets_delete', id=asset.id) }}" class="btn btn-sm btn-outline-danger" title="حذف" onclick="return confirm('هل أنت متأكد من حذف هذا الأصل؟')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+
+                <div class="modal fade" id="maintenanceModal{{ asset.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">تسجيل صيانة</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('maintenance_add', id=asset.id) }}">
+                                <div class="modal-body">
+                                    <div class="mb-2">
+                                        <label class="form-label">نوع الصيانة</label>
+                                        <select name="maintenance_type" class="form-select">
+                                            <option value="preventive">وقائية</option>
+                                            <option value="repair">إصلاح</option>
+                                            <option value="inspection">فحص</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">الوصف</label>
+                                        <textarea name="description" class="form-control" rows="2"></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">التكلفة</label>
+                                        <input type="number" name="cost" class="form-control" step="0.01">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">منفذ الصيانة</label>
+                                        <input type="text" name="performed_by" class="form-control">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">تاريخ الصيانة</label>
+                                        <input type="date" name="maintenance_date" class="form-control">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">الصيانة القادمة</label>
+                                        <input type="date" name="next_maintenance" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                    <button type="submit" class="btn btn-primary">حفظ</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد أصول</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if assets.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if assets.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('assets_list', page=assets.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in assets.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == assets.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('assets_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if assets.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('assets_list', page=assets.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

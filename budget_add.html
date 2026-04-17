@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة ميزانية{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-plus-circle me-2"></i>إضافة ميزانية جديدة</h2>
+            <p class="mb-0 opacity-75">تسجيل ميزانية جديدة للسنة المالية</p>
+        </div>
+        <a href="{{ url_for('budget_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">السنة المالية <span class="text-danger">*</span></label>
+                    <input type="text" name="fiscal_year" class="form-control" required placeholder="مثال: 2024" value="{{ now.year }}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">القسم</label>
+                    <select name="department" class="form-select">
+                        <option value="">الكل</option>
+                        <option value="الإدارة العامة">الإدارة العامة</option>
+                        <option value="الشؤون المالية">الشؤون المالية</option>
+                        <option value="شؤون الموظفين">شؤون الموظفين</option>
+                        <option value="التقنية المعلومات">التقنية المعلومات</option>
+                        <option value="الشؤون القانونية">الشؤون القانونية</option>
+                        <option value="الخدمات العامة">الخدمات العامة</option>
+                        <option value="المشاريع والإنشاءات">المشاريع والإنشاءات</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">المبلغ المرصود <span class="text-danger">*</span></label>
+                    <input type="number" name="allocated_amount" class="form-control" step="0.01" required placeholder="0.00">
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('budget_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-save me-2"></i>حفظ الميزانية
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

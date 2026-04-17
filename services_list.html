@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}الخدمات الإلكترونية{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-headset me-2"></i>نظام الخدمات الإلكترونية</h2>
+            <p class="mb-0 opacity-75">إدارة طلبات الخدمات للمواطنين</p>
+        </div>
+        <a href="{{ url_for('services_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>طلب جديد
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">الحالة</label>
+                <select name="status" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>معلق</option>
+                    <option value="in_progress" {% if request.args.get('status') == 'in_progress' %}selected{% endif %}>قيد التنفيذ</option>
+                    <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>مكتمل</option>
+                    <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>مرفوض</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>اسم المواطن</th>
+                    <th>نوع الخدمة</th>
+                    <th>الهاتف</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services.items %}
+                <tr>
+                    <td><strong>{{ service.request_number }}</strong></td>
+                    <td>{{ service.citizen_name }}</td>
+                    <td>{{ service.service_type }}</td>
+                    <td>{{ service.phone or '-' }}</td>
+                    <td>
+                        {% if service.status == 'pending' %}
+                            <span class="badge badge-status badge-pending">معلق</span>
+                        {% elif service.status == 'in_progress' %}
+                            <span class="badge badge-status badge-in-progress">قيد التنفيذ</span>
+                        {% elif service.status == 'completed' %}
+                            <span class="badge badge-status badge-completed">مكتمل</span>
+                        {% elif service.status == 'rejected' %}
+                            <span class="badge badge-status badge-rejected">مرفوض</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ service.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{{ url_for('services_view', id=service.id) }}" class="btn btn-sm btn-outline-government" title="عرض">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('services_delete', id=service.id) }}" class="btn btn-sm btn-outline-danger" title="حذف" onclick="return confirm('هل أنت متأكد من حذف هذا الطلب؟')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="fas fa-headset fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد طلبات</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if services.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if services.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('services_list', page=services.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in services.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == services.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('services_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if services.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('services_list', page=services.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

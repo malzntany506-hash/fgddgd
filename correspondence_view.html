@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}تفاصيل المراسلة{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-envelope-open-text me-2"></i>تفاصيل المراسلة</h2>
+            <p class="mb-0 opacity-75">رقم المراسلة: {{ correspondence.doc_number }}</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-outline-light">
+                <i class="fas fa-print me-2"></i>طباعة
+            </button>
+            <a href="{{ url_for('correspondence_list') }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-right me-2"></i>العودة
+            </a>
+            {% if correspondence.status != 'completed' %}
+            <a href="{{ url_for('correspondence_complete', id=correspondence.id) }}" class="btn btn-success">
+                <i class="fas fa-check me-2"></i>إتمام المعاملة
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card card-custom mb-4">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-info-circle me-2"></i>معلومات المراسلة
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">الرقم التسلسلي</label>
+                        <p class="mb-0 fw-bold">{{ correspondence.doc_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">النوع</label>
+                        <p class="mb-0">
+                            {% if correspondence.doc_type == 'incoming' %}
+                                <span class="badge bg-primary">وارد</span>
+                            {% else %}
+                                <span class="badge bg-success">صادر</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">الحالة</label>
+                        <p class="mb-0">
+                            {% if correspondence.status == 'pending' %}
+                                <span class="badge badge-status badge-pending">معلق</span>
+                            {% elif correspondence.status == 'in_progress' %}
+                                <span class="badge badge-status badge-in-progress">قيد التنفيذ</span>
+                            {% elif correspondence.status == 'completed' %}
+                                <span class="badge badge-status badge-completed">مكتمل</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">الأولوية</label>
+                        <p class="mb-0">
+                            {% if correspondence.priority == 'urgent' %}
+                                <span class="badge bg-danger">عاجل</span>
+                            {% elif correspondence.priority == 'high' %}
+                                <span class="badge bg-warning">مرتفع</span>
+                            {% else %}
+                                <span class="badge bg-secondary">عادي</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted">الموضوع</label>
+                        <p class="mb-0 fw-bold">{{ correspondence.subject }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">المرسل</label>
+                        <p class="mb-0">{{ correspondence.sender }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">المستلم</label>
+                        <p class="mb-0">{{ correspondence.recipient or '-' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">تاريخ الإنشاء</label>
+                        <p class="mb-0">{{ correspondence.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">تاريخ الاستحقاق</label>
+                        <p class="mb-0">{{ correspondence.due_date.strftime('%Y-%m-%d') if correspondence.due_date else '-' }}</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted">المحتوى</label>
+                        <p class="mb-0">{{ correspondence.content or 'لا يوجد محتوى' }}</p>
+                    </div>
+                    {% if correspondence.attachment %}
+                    <div class="col-12">
+                        <label class="form-label text-muted">المرفقات</label>
+                        <a href="{{ url_for('download_file', filename=correspondence.attachment) }}" class="btn btn-sm btn-outline-government">
+                            <i class="fas fa-paperclip me-1"></i>تحميل المرفق
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-custom">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-history me-2"></i>تتبع المعاملة
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('correspondence_track', id=correspondence.id) }}" class="mb-4">
+                    <h6 class="mb-3">إضافة تتبع جديد</h6>
+                    <div class="mb-2">
+                        <input type="text" name="action" class="form-control" placeholder="الإجراء (مثال: تم الإرسال للجهة المختصة)" required>
+                    </div>
+                    <div class="mb-2">
+                        <input type="text" name="recipient_name" class="form-control" placeholder="اسم المستلم">
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="notes" class="form-control" rows="2" placeholder="ملاحظات إضافية"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-government w-100">
+                        <i class="fas fa-plus me-2"></i>إضافة
+                    </button>
+                </form>
+
+                <hr>
+
+                <div class="tracking-timeline">
+                    {% for track in tracking_records %}
+                    <div class="tracking-item">
+                        <div class="fw-bold">{{ track.action }}</div>
+                        <small class="text-muted">
+                            {% if track.recipient_name %}تم التسليم إلى: {{ track.recipient_name }}{% endif %}
+                        </small>
+                        <div class="small text-muted">
+                            {{ track.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                        {% if track.notes %}
+                        <div class="small mt-1">
+                            <i class="fas fa-sticky-note me-1"></i>{{ track.notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

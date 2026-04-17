@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مشروع{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-folder-plus me-2"></i>إضافة مشروع جديد</h2>
+            <p class="mb-0 opacity-75">تسجيل مشروع حكومي جديد</p>
+        </div>
+        <a href="{{ url_for('projects_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-4">
+                <div class="col-12">
+                    <label class="form-label">اسم المشروع <span class="text-danger">*</span></label>
+                    <input type="text" name="project_name" class="form-control" required placeholder="أدخل اسم المشروع">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">وصف المشروع</label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="وصف موجز للمشروع..."></textarea>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">القسم</label>
+                    <select name="department" class="form-select">
+                        <option value="">اختر القسم</option>
+                        <option value="الإدارة العامة">الإدارة العامة</option>
+                        <option value="الشؤون المالية">الشؤون المالية</option>
+                        <option value="التقنية المعلومات">التقنية المعلومات</option>
+                        <option value="الخدمات العامة">الخدمات العامة</option>
+                        <option value="المشاريع والإنشاءات">المشاريع والإنشاءات</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">المقاول</label>
+                    <input type="text" name="contractor" class="form-control" placeholder="اسم المقاول">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">تاريخ البدء</label>
+                    <input type="date" name="start_date" class="form-control">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">تاريخ الانتهاء المتوقع</label>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الميزانية</label>
+                    <input type="number" name="budget" class="form-control" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('projects_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-save me-2"></i>حفظ المشروع
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

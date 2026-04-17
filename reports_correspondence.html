@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}تقارير المراسلات{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-chart-bar me-2"></i>تقارير المراسلات</h2>
+            <p class="mb-0 opacity-75">إحصائيات وتحليلات المراسلات</p>
+        </div>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">من تاريخ</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">إلى تاريخ</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-filter me-1"></i>تطبيق الفلتر
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-header card-header-custom">
+        <i class="fas fa-list me-2"></i>تفاصيل المراسلات
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>الرقم</th>
+                    <th>النوع</th>
+                    <th>الموضوع</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for corr in correspondences %}
+                <tr>
+                    <td>{{ corr.doc_number }}</td>
+                    <td>
+                        {% if corr.doc_type == 'incoming' %}
+                            <span class="badge bg-primary">وارد</span>
+                        {% else %}
+                            <span class="badge bg-success">صادر</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ corr.subject[:50] }}...</td>
+                    <td>
+                        {% if corr.status == 'pending' %}
+                            <span class="badge badge-status badge-pending">معلق</span>
+                        {% elif corr.status == 'in_progress' %}
+                            <span class="badge badge-status badge-in-progress">قيد التنفيذ</span>
+                        {% elif corr.status == 'completed' %}
+                            <span class="badge badge-status badge-completed">مكتمل</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ corr.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">لا توجد مراسلات في هذه الفترة</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-government">
+        <i class="fas fa-arrow-right me-2"></i>العودة للوحة التحكم
+    </a>
+</div>
+{% endblock %}

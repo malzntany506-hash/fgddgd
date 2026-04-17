@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}الحضور والانصراف{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-clock me-2"></i>الحضور والانصراف</h2>
+            <p class="mb-0 opacity-75">سجل حضور وانصراف الموظفين</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card card-custom">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-calendar me-2"></i>التاريخ
+            </div>
+            <div class="card-body">
+                <input type="date" id="attendanceDate" class="form-control" value="{{ selected_date }}" onchange="window.location.href='?date=' + this.value + '&department=' + document.querySelector('[name=department]').value">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-building me-2"></i>القسم
+            </div>
+            <div class="card-body">
+                <select class="form-select" onchange="window.location.href='?date=' + document.getElementById('attendanceDate').value + '&department=' + this.value">
+                    <option value="">الكل</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if request.args.get('department') == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom">
+            <div class="card-header card-header-custom">
+                <i class="fas fa-user-plus me-2"></i>تسجيل حضور
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('attendance_checkin') }}">
+                    <div class="input-group">
+                        <select name="employee_id" class="form-select" required>
+                            <option value="">اختر الموظف</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-header card-header-custom">
+        <i class="fas fa-list me-2"></i>سجل الحضور ليوم {{ selected_date }}
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>الموظف</th>
+                    <th>القسم</th>
+                    <th>وقت الحضور</th>
+                    <th>وقت الانصراف</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for att in attendance_records %}
+                <tr>
+                    <td>{{ att.employee.full_name }}</td>
+                    <td>{{ att.employee.department or '-' }}</td>
+                    <td>{{ att.check_in.strftime('%H:%M') if att.check_in else '-' }}</td>
+                    <td>{{ att.check_out.strftime('%H:%M') if att.check_out else '-' }}</td>
+                    <td>
+                        {% if att.status == 'present' %}
+                            <span class="badge bg-success">حاضر</span>
+                        {% elif att.status == 'absent' %}
+                            <span class="badge bg-danger">غائب</span>
+                        {% elif att.status == 'half_day' %}
+                            <span class="badge bg-warning">نصف يوم</span>
+                        {% elif att.status == 'late' %}
+                            <span class="badge bg-info">متأخر</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ att.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not att.check_out %}
+                        <form method="POST" action="{{ url_for('attendance_checkout', id=att.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> انصراف
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد سجل حضور لهذا اليوم</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

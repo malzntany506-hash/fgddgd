@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}المخزون{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-boxes me-2"></i>إدارة المخزون</h2>
+            <p class="mb-0 opacity-75">سجل المواد والمخزون</p>
+        </div>
+        <a href="{{ url_for('inventory_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>إضافة مادة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">الفئة</label>
+                <select name="category" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="office" {% if request.args.get('category') == 'office' %}selected{% endif %}>قرطاسية</option>
+                    <option value="electronics" {% if request.args.get('category') == 'electronics' %}selected{% endif %}>إلكترونيات</option>
+                    <option value="cleaning" {% if request.args.get('category') == 'cleaning' %}selected{% endif %}>تنظيف</option>
+                    <option value="maintenance" {% if request.args.get('category') == 'maintenance' %}selected{% endif %}>صيانة</option>
+                    <option value="other" {% if request.args.get('category') == 'other' %}selected{% endif %}>أخرى</option>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>رقم المادة</th>
+                    <th>اسم المادة</th>
+                    <th>الفئة</th>
+                    <th>الكمية</th>
+                    <th>الحد الأدنى</th>
+                    <th>الوحدة</th>
+                    <th>الموقع</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory.items %}
+                <tr>
+                    <td><strong>{{ item.item_number }}</strong></td>
+                    <td>{{ item.item_name }}</td>
+                    <td>
+                        {% if item.category == 'office' %}
+                            <span class="badge bg-primary">قرطاسية</span>
+                        {% elif item.category == 'electronics' %}
+                            <span class="badge bg-warning">إلكترونيات</span>
+                        {% elif item.category == 'cleaning' %}
+                            <span class="badge bg-info">تنظيف</span>
+                        {% elif item.category == 'maintenance' %}
+                            <span class="badge bg-secondary">صيانة</span>
+                        {% else %}
+                            <span class="badge bg-secondary">أخرى</span>
+                        {% endif %}
+                    </td>
+                    <td class="fw-bold {% if item.quantity <= item.min_quantity %}text-danger{% else %}text-success{% endif %}">
+                        {{ item.quantity }}
+                    </td>
+                    <td>{{ item.min_quantity }}</td>
+                    <td>{{ item.unit or '-' }}</td>
+                    <td>{{ item.location or '-' }}</td>
+                    <td>
+                        {% if item.status == 'available' %}
+                            <span class="badge bg-success">متاح</span>
+                        {% elif item.status == 'low_stock' %}
+                            <span class="badge bg-danger">نفاد</span>
+                        {% elif item.status == 'out_of_stock' %}
+                            <span class="badge bg-dark">غير متاح</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateModal{{ item.id }}" title="تعديل الكمية">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('inventory_delete', id=item.id) }}" class="btn btn-sm btn-outline-danger" title="حذف" onclick="return confirm('هل أنت متأكد من حذف هذه المادة؟')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+
+                <div class="modal fade" id="updateModal{{ item.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">تحديث الكمية</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('inventory_update', id=item.id) }}">
+                                <div class="modal-body">
+                                    <p>المادة: {{ item.item_name }}</p>
+                                    <div class="mb-3">
+                                        <label class="form-label">الكمية الجديدة</label>
+                                        <input type="number" name="quantity" class="form-control" value="{{ item.quantity }}" required>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                    <button type="submit" class="btn btn-primary">تحديث</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-5">
+                        <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد مخزون</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if inventory.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if inventory.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('inventory_list', page=inventory.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in inventory.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == inventory.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('inventory_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if inventory.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('inventory_list', page=inventory.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

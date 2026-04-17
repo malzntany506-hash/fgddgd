@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}تفاصيل الوثيقة المؤرشفة{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-file-archive me-2"></i>تفاصيل الوثيقة</h2>
+            <p class="mb-0 opacity-75">رقم الأرشيف: {{ archive.archive_number }}</p>
+        </div>
+        <a href="{{ url_for('archive_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-header card-header-custom">
+        <i class="fas fa-info-circle me-2"></i>معلومات الوثيقة
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="form-label text-muted">عنوان الوثيقة</label>
+                <p class="mb-0 fw-bold">{{ archive.title }}</p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted">نوع المستند</label>
+                <p class="mb-0">
+                    {% if archive.doc_type == 'correspondence' %}
+                        <span class="badge bg-primary">مراسلات</span>
+                    {% elif archive.doc_type == 'contract' %}
+                        <span class="badge bg-success">عقود</span>
+                    {% elif archive.doc_type == 'financial' %}
+                        <span class="badge bg-warning">مالية</span>
+                    {% elif archive.doc_type == 'hr' %}
+                        <span class="badge bg-info">موارد بشرية</span>
+                    {% elif archive.doc_type == 'project' %}
+                        <span class="badge bg-purple">مشاريع</span>
+                    {% else %}
+                        <span class="badge bg-secondary">أخرى</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted">القسم</label>
+                <p class="mb-0">{{ archive.department or '-' }}</p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted">تاريخ الأرشفة</label>
+                <p class="mb-0">{{ archive.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+            <div class="col-12">
+                <label class="form-label text-muted">الوصف</label>
+                <p class="mb-0">{{ archive.description or 'لا يوجد وصف' }}</p>
+            </div>
+            {% if archive.related_module %}
+            <div class="col-md-6">
+                <label class="form-label text-muted">الوحدة المرتبطة</label>
+                <p class="mb-0">{{ archive.related_module }} (رقم: {{ archive.related_id or '-' }})</p>
+            </div>
+            {% endif %}
+            {% if archive.file_path %}
+            <div class="col-12">
+                <hr>
+                <label class="form-label text-muted">الملف المرفق</label>
+                <div class="mt-2">
+                    <a href="{{ url_for('download_file', filename=archive.file_path) }}" class="btn btn-government">
+                        <i class="fas fa-download me-2"></i>تحميل الوثيقة
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة أصل{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-plus-circle me-2"></i>إضافة أصل جديد</h2>
+            <p class="mb-0 opacity-75">تسجيل أصل جديد في النظام</p>
+        </div>
+        <a href="{{ url_for('assets_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">اسم الأصل <span class="text-danger">*</span></label>
+                    <input type="text" name="asset_name" class="form-control" required placeholder="أدخل اسم الأصل">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">نوع الأصل</label>
+                    <select name="asset_type" class="form-select">
+                        <option value="">اختر النوع</option>
+                        <option value="equipment">معدات</option>
+                        <option value="furniture">أثاث</option>
+                        <option value="vehicle">مركبات</option>
+                        <option value="electronics">إلكترونيات</option>
+                        <option value="building">مباني</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الرقم التسلسلي</label>
+                    <input type="text" name="serial_number" class="form-control" placeholder="الرقم التسلسلي">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">تاريخ الشراء</label>
+                    <input type="date" name="purchase_date" class="form-control">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">سعر الشراء</label>
+                    <input type="number" name="purchase_price" class="form-control" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">القيمة الحالية</label>
+                    <input type="number" name="current_value" class="form-control" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">الموقع</label>
+                    <input type="text" name="location" class="form-control" placeholder="موقع الأصل">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">مخصص لـ</label>
+                    <select name="assigned_to" class="form-select">
+                        <option value="">غير مخصص</option>
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">ملاحظات</label>
+                    <textarea name="notes" class="form-control" rows="3" placeholder="ملاحظات إضافية..."></textarea>
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('assets_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-save me-2"></i>حفظ الأصل
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

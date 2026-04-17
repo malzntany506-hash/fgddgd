@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}الموظفين{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-users me-2"></i>إدارة الموظفين</h2>
+            <p class="mb-0 opacity-75">سجل الموظفين والإدارة</p>
+        </div>
+        <a href="{{ url_for('employees_add') }}" class="btn btn-government">
+            <i class="fas fa-user-plus me-2"></i>إضافة موظف
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">القسم</label>
+                <select name="department" class="form-select">
+                    <option value="">الكل</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if request.args.get('department') == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">بحث</label>
+                <input type="text" name="search" class="form-control" placeholder="البحث بالاسم أو الرقم الوظيفي..." value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">الحالة</label>
+                <select name="is_active" class="form-select">
+                    <option value="true" {% if request.args.get('is_active') == 'true' %}selected{% endif %}>نشط</option>
+                    <option value="false" {% if request.args.get('is_active') == 'false' %}selected{% endif %}>غير نشط</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>الرقم الوظيفي</th>
+                        <th>الاسم</th>
+                        <th>القسم</th>
+                        <th>المنصب</th>
+                        <th>رقم الهاتف</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees.items %}
+                    <tr>
+                        <td><strong>{{ emp.employee_number }}</strong></td>
+                        <td>{{ emp.full_name }}</td>
+                        <td>{{ emp.department or '-' }}</td>
+                        <td>{{ emp.position or '-' }}</td>
+                        <td>{{ emp.phone or '-' }}</td>
+                        <td>
+                            {% if emp.is_active %}
+                                <span class="badge bg-success">نشط</span>
+                            {% else %}
+                                <span class="badge bg-secondary">غير نشط</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('employees_view', id=emp.id) }}" class="btn btn-sm btn-outline-government" title="عرض">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('employees_edit', id=emp.id) }}" class="btn btn-sm btn-outline-secondary" title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if current_user.role == 'admin' %}
+                                <a href="{{ url_for('employees_delete', id=emp.id) }}" class="btn btn-sm btn-outline-danger" title="تعطيل" onclick="return confirm('هل أنت متأكد من تعطيل حساب هذا الموظف؟')">
+                                    <i class="fas fa-user-slash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">لا يوجد موظفين</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if employees.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if employees.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('employees_list', page=employees.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in employees.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == employees.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('employees_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if employees.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('employees_list', page=employees.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

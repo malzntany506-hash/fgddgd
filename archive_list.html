@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}الأرشيف{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-archive me-2"></i>الأرشيف الإلكتروني</h2>
+            <p class="mb-0 opacity-75">حفظ والبحث في الوثائق المؤرشفة</p>
+        </div>
+        <a href="{{ url_for('archive_add') }}" class="btn btn-government">
+            <i class="fas fa-plus me-2"></i>أرشفة وثيقة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">نوع المستند</label>
+                <select name="doc_type" class="form-select">
+                    <option value="">الكل</option>
+                    <option value="correspondence" {% if request.args.get('doc_type') == 'correspondence' %}selected{% endif %}>مراسلات</option>
+                    <option value="contract" {% if request.args.get('doc_type') == 'contract' %}selected{% endif %}>عقود</option>
+                    <option value="financial" {% if request.args.get('doc_type') == 'financial' %}selected{% endif %}>مالية</option>
+                    <option value="hr" {% if request.args.get('doc_type') == 'hr' %}selected{% endif %}>موارد بشرية</option>
+                    <option value="project" {% if request.args.get('doc_type') == 'project' %}selected{% endif %}>مشاريع</option>
+                    <option value="other" {% if request.args.get('doc_type') == 'other' %}selected{% endif %}>أخرى</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">بحث</label>
+                <input type="text" name="search" class="form-control" placeholder="البحث بالرقم أو العنوان..." value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-government w-100">
+                    <i class="fas fa-search me-1"></i>بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>رقم الأرشيف</th>
+                    <th>العنوان</th>
+                    <th>النوع</th>
+                    <th>القسم</th>
+                    <th>التاريخ</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for arch in archives.items %}
+                <tr>
+                    <td><strong>{{ arch.archive_number }}</strong></td>
+                    <td>{{ arch.title[:50] }}...</td>
+                    <td>
+                        {% if arch.doc_type == 'correspondence' %}
+                            <span class="badge bg-primary">مراسلات</span>
+                        {% elif arch.doc_type == 'contract' %}
+                            <span class="badge bg-success">عقود</span>
+                        {% elif arch.doc_type == 'financial' %}
+                            <span class="badge bg-warning">مالية</span>
+                        {% elif arch.doc_type == 'hr' %}
+                            <span class="badge bg-info">موارد بشرية</span>
+                        {% elif arch.doc_type == 'project' %}
+                            <span class="badge bg-purple">مشاريع</span>
+                        {% else %}
+                            <span class="badge bg-secondary">أخرى</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ arch.department or '-' }}</td>
+                    <td>{{ arch.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{{ url_for('archive_view', id=arch.id) }}" class="btn btn-sm btn-outline-government" title="عرض">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if arch.file_path %}
+                            <a href="{{ url_for('download_file', filename=arch.file_path) }}" class="btn btn-sm btn-outline-primary" title="تحميل">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            {% endif %}
+                            {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('archive_delete', id=arch.id) }}" class="btn btn-sm btn-outline-danger" title="حذف" onclick="return confirm('هل أنت متأكد من حذف هذه الوثيقة؟')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <i class="fas fa-archive fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">لا يوجد وثائق مؤرشفة</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if archives.pages > 1 %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if archives.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('archive_list', page=archives.prev_num) }}">السابق</a>
+        </li>
+        {% endif %}
+        {% for page_num in archives.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == archives.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('archive_list', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% if archives.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('archive_list', page=archives.next_num) }}">التالي</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

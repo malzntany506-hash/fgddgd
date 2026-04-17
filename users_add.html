@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مستخدم{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-user-plus me-2"></i>إضافة مستخدم جديد</h2>
+            <p class="mb-0 opacity-75">إنشاء حساب مستخدم جديد</p>
+        </div>
+        <a href="{{ url_for('users_list') }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-right me-2"></i>العودة
+        </a>
+    </div>
+</div>
+
+<div class="card card-custom">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">اسم المستخدم <span class="text-danger">*</span></label>
+                    <input type="text" name="username" class="form-control" required placeholder="أدخل اسم المستخدم">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">كلمة المرور <span class="text-danger">*</span></label>
+                    <input type="password" name="password" class="form-control" required placeholder="أدخل كلمة المرور">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                    <input type="text" name="full_name" class="form-control" required placeholder="أدخل الاسم الكامل">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">الدور</label>
+                    <select name="role" class="form-select">
+                        <option value="employee">موظف</option>
+                        <option value="admin">مدير النظام</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">القسم</label>
+                    <select name="department" class="form-select">
+                        <option value="">اختر القسم</option>
+                        <option value="الإدارة العامة">الإدارة العامة</option>
+                        <option value="الشؤون المالية">الشؤون المالية</option>
+                        <option value="شؤون الموظفين">شؤون الموظفين</option>
+                        <option value="التقنية المعلومات">التقنية المعلومات</option>
+                        <option value="الشؤون القانونية">الشؤون القانونية</option>
+                        <option value="الخدمات العامة">الخدمات العامة</option>
+                        <option value="المشاريع والإنشاءات">المشاريع والإنشاءات</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('users_list') }}" class="btn btn-outline-government">إلغاء</a>
+                        <button type="submit" class="btn btn-government">
+                            <i class="fas fa-save me-2"></i>حفظ المستخدم
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
